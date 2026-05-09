@@ -14,7 +14,6 @@ async function UsersData() {
 
   try {
     users = await fetchUsersWithActivity();
-    console.log(users);
   } catch (err) {
     errorMsg = err instanceof Error ? err.message : "Unknown Error";
   }

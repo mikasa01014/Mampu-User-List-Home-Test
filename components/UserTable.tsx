@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { UserWithActivity } from "@/lib/types";
 import { ActivityBadges } from "./ActivityBadges";
+import { useRouter } from "next/navigation";
 
 interface UsersTableProps {
   users: UserWithActivity[];
@@ -13,7 +14,7 @@ function Avatar({ name } : { name : string }) {
   const initials = name
     .split(" ")
     .splice(0, 2)
-    .map((n) => n[0])
+    .map((name) => name[0])
     .join("")
     .toUpperCase();
   const colors = [
@@ -31,7 +32,7 @@ function Avatar({ name } : { name : string }) {
   const color = colors[name.charCodeAt(0) % colors.length];
   return (
     <div
-      className={`${color} w-8.5 h-8.5 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shirnk-0`}
+      className={`${color} w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}
       aria-hidden="true"
     >
       {initials}
@@ -40,6 +41,8 @@ function Avatar({ name } : { name : string }) {
 }
 
 export function UsersTable({ users } : UsersTableProps) {
+  const router = useRouter();
+  
   const filtered = useMemo(() => {
     const result = users;
 
@@ -58,7 +61,7 @@ export function UsersTable({ users } : UsersTableProps) {
       <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
         <table className="w-full text-sm" role="grid" aria-label="Users List">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-60">
+            <tr className="border-b border-slate-200 bg-slate-100">
               <th
                 scope="col"
                 className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider rounded-tl-xl"
@@ -102,14 +105,19 @@ export function UsersTable({ users } : UsersTableProps) {
               <tr
                 key={user.id}
                 className="hover:bg-indigo-50/40 transition-colors group cursor-pointer"
+                onClick={() => router.push(`/users/${user.id}`)}
               >
                 <td className="px-4 py-3.5">
                   <div className="flex items-center gap-3 min-w-0">
                     <Avatar name={user.name} />
                     <div className="min-w-0">
-                      <div className="font-semibold text-slate-800 hover:text-indigo-600 transition-colors truncate block max-w-[180px] group-hover:text-indigo-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded">
+                      <a
+                        href={`/users/${user.id}`} 
+                        className="font-semibold text-slate-800 hover:text-indigo-600 transition-colors truncate block max-w-[180px] group-hover:text-indigo-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {user.name}
-                      </div>
+                      </a>
                       <span className="text-xs text-slate-400 font-mono">
                         @{user.username}
                       </span>
@@ -160,7 +168,8 @@ export function UsersTable({ users } : UsersTableProps) {
       {/* Mobile card list */}
       <div className="md:hidden space-y-4" role="list" aria-label="Users list">
         {filtered.map((user) => (
-          <div
+          <a
+            href={`/users/${user.id}`}
             className="flex flex-col gap-3 bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             key={user.id}
             role="listitem"
@@ -192,7 +201,7 @@ export function UsersTable({ users } : UsersTableProps) {
               completedTodos={user.completedTodos}
               pendingTodos={user.pendingTodos}
             />
-          </div>
+          </a>
         ))}
       </div>
     </div>
