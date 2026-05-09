@@ -2,6 +2,7 @@ import { fetchUsersWithActivity } from '@/lib/api'
 import { Suspense } from 'react'
 import type { Metadata } from "next";
 import { UsersTable } from '@/components/UserTable';
+import { SkeletonTable, SkeletonMobileCard } from "@/components/Skeletons";
 
 export const metadata: Metadata = {
   title: "Users",
@@ -50,6 +51,43 @@ async function UsersData() {
   return <UsersTable users={users ?? []} />;
 }
 
+function UsersLoadingFallback() {
+  return (
+    <>
+      {/* Desktop Skeleton */}
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <table className="w-full text-sm" aria-label="Loading users">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50">
+              {[
+                "Name",
+                "Posts",
+                "Completed",
+                "Pending",
+                "Email",
+                "Website",
+              ].map((header) => (
+                <th
+                  key={header}
+                  className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider"
+                >
+                  {header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <SkeletonTable rows={8} />
+        </table>
+      </div>
+
+      {/* Mobile skeleton */}
+      <div className="md:hidden">
+        <SkeletonMobileCard count={5} />
+      </div>
+    </>
+  );
+}
+
 export default function UsersPage() {
  
   return (
@@ -60,7 +98,7 @@ export default function UsersPage() {
         </h1>
       </div>
 
-      <Suspense>
+      <Suspense fallback={<UsersLoadingFallback />}>
         <UsersData />
       </Suspense>
     </div>
