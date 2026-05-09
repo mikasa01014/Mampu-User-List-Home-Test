@@ -47,3 +47,7 @@ export interface UserWithActivity extends User {
   completedTodos: number;
   pendingTodos: number;
 }
+
+export type SortField = "name" | "totalPosts" | "completedTodos" | "pendingTodos";
+export type SortOrder = "asc" | "desc";
+export type FilterType = "all" | "hasPending" | "noCompleted" | "active";
