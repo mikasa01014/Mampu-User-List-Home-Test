@@ -1,4 +1,7 @@
+"use client";
+
 import type { User, Post, Todo } from "@/lib/types";
+import { useState } from "react";
 
 interface InfoRowProps {
   label: string;
@@ -24,9 +27,12 @@ interface UserDetailCardProps {
   todo: Todo[];
 }
 
-export function UserDetailCard({ user, post, todo }: UserDetailCardProps){
+export function UserDetailCard({ user, post, todo }: UserDetailCardProps) {
   const completeTodos = todo.filter((data) => data.completed);
   const pendingTodos = todo.filter((data) => !data.completed);
+
+  const [showAllPosts, setShowAllPosts] = useState(false);
+  const [showAllTodos, setShowAllTodos] = useState(false);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -91,6 +97,17 @@ export function UserDetailCard({ user, post, todo }: UserDetailCardProps){
             <InfoRow label="Zipcode" value={user.address.zipcode} />
           </dl>
         </div>
+
+        {/* Company */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm md:col-span-2">
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+            Company
+          </h2>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InfoRow label="Name" value={user.company.name} />
+            <InfoRow label="Catchphrase" value={user.company.catchPhrase} />
+          </dl>
+        </div>
       </div>
 
       {/* Posts */}
@@ -108,32 +125,56 @@ export function UserDetailCard({ user, post, todo }: UserDetailCardProps){
             No post(s) yet
           </p>
         ) : (
-          <ul className="divide-y divide-slate-200">
-            {post.slice(0, 5).map((posts) => (
-              <li key={posts.id} className="px-5 py-4">
-                <p className="font-semibold text-slate-800 text-sm capitalize leading-snug break-words">
-                  {posts.title}
-                </p>
-                <p className="text-slate-500 text-sm mt-1 line-clamp-2 break-words">
-                  {posts.body}
-                </p>
-              </li>
-            ))}
-            {post.length > 5 && (
+          <ul className="divide-y divide-slate-200" data-testid="posts-list">
+            {showAllPosts
+              ? post.map((posts) => (
+                  <li key={posts.id} className="px-5 py-4">
+                    <p className="font-semibold text-slate-800 text-sm capitalize leading-snug break-words">
+                      {posts.title}
+                    </p>
+                    <p className="text-slate-500 text-sm mt-1 line-clamp-2 break-words">
+                      {posts.body}
+                    </p>
+                  </li>
+                ))
+              : post.slice(0, 5).map((posts) => (
+                  <li key={posts.id} className="px-5 py-4">
+                    <p className="font-semibold text-slate-800 text-sm capitalize leading-snug break-words">
+                      {posts.title}
+                    </p>
+                    <p className="text-slate-500 text-sm mt-1 line-clamp-2 break-words">
+                      {posts.body}
+                    </p>
+                  </li>
+                ))}
+            {!showAllPosts && post.length > 5 && (
               <li className="px-5 py-3 bg-slate-50">
-                <p className="text-xs text-slate-500 text-center">
+                <button
+                  onClick={() => setShowAllPosts(true)}
+                  className="w-full text-xs text-indigo-600 text-center hover:text-indigo-700 font-medium cursor-pointer"
+                >
                   +{post.length - 5} more post(s)
-                </p>
+                </button>
+              </li>
+            )}
+
+            {showAllPosts && post.length > 5 && (
+              <li className="px-5 py-3 bg-slate-50">
+                <button
+                  onClick={() => setShowAllPosts(false)}
+                  className="w-full text-xs text-slate-500 hover:text-slate-700 font-medium cursor-pointer"
+                >
+                  Show less
+                </button>
               </li>
             )}
           </ul>
         )}
       </div>
 
-
       {/* Todos */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+        <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-3">
           <h2 className="font-bold text-slate-800">
             Todos{" "}
             <span className="text-slate-400 font-normal text-sm ml-1">
@@ -153,59 +194,116 @@ export function UserDetailCard({ user, post, todo }: UserDetailCardProps){
         </div>
         {todo.length === 0 ? (
           <p className="px-5 py-8 text-sm text-slate-400 text-center">
-            No todos yet.
+            No todo(s) yet.
           </p>
         ) : (
           <ul
             className="divide-y divide-slate-100 max-h-80 overflow-y-auto"
             data-testid="todos-list"
           >
-            {[...pendingTodos.slice(0, 5), ...completeTodos.slice(0, 5)].map(
-              (todo) => (
-                <li key={todo.id} className="px-5 py-3 flex items-start gap-3">
-                  <div
-                    className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${
-                      todo.completed
-                        ? "bg-emerald-500"
-                        : "border-2 border-amber-400"
-                    }`}
+            {showAllTodos
+              ? [...pendingTodos, ...completeTodos].map((todo) => (
+                  <li
+                    key={todo.id}
+                    className="px-5 py-3 flex items-start gap-3"
                   >
-                    {todo.completed && (
-                      <svg
-                        className="w-2.5 h-2.5 text-white"
-                        viewBox="0 0 10 10"
-                        fill="none"
+                    <div
+                      className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${
+                        todo.completed
+                          ? "bg-emerald-500"
+                          : "border-2 border-amber-400"
+                      }`}
+                    >
+                      {todo.completed && (
+                        <svg
+                          className="w-2.5 h-2.5 text-white"
+                          viewBox="0 0 10 10"
+                          fill="none"
+                        >
+                          <path
+                            d="M2 5l2.5 2.5L8 2.5"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <span
+                      className={`text-sm break-words ${
+                        todo.completed
+                          ? "text-slate-400 line-through"
+                          : "text-slate-700"
+                      }`}
+                    >
+                      {todo.title}
+                    </span>
+                  </li>
+                ))
+              : [...pendingTodos.slice(0, 5), ...completeTodos.slice(0, 5)].map(
+                  (todo) => (
+                    <li
+                      key={todo.id}
+                      className="px-5 py-3 flex items-start gap-3"
+                    >
+                      <div
+                        className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${
+                          todo.completed
+                            ? "bg-emerald-500"
+                            : "border-2 border-amber-400"
+                        }`}
                       >
-                        <path
-                          d="M2 5l2.5 2.5L8 2.5"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  <span
-                    className={`text-sm break-words ${
-                      todo.completed
-                        ? "text-slate-400 line-through"
-                        : "text-slate-700"
-                    }`}
-                  >
-                    {todo.title}
-                  </span>
-                </li>
-              ),
-            )}
-            {todo.length > 10 && (
-              <li className="px-5 py-3 bg-slate-50">
-                <p className="text-xs text-slate-500 text-center">
-                  Showing 10 of {todo.length} todo(s)
-                </p>
-              </li>
-            )}
+                        {todo.completed && (
+                          <svg
+                            className="w-2.5 h-2.5 text-white"
+                            viewBox="0 0 10 10"
+                            fill="none"
+                          >
+                            <path
+                              d="M2 5l2.5 2.5L8 2.5"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <span
+                        className={`text-sm break-words ${
+                          todo.completed
+                            ? "text-slate-400 line-through"
+                            : "text-slate-700"
+                        }`}
+                      >
+                        {todo.title}
+                      </span>
+                    </li>
+                  ),
+                )}
           </ul>
+        )}
+        {!showAllTodos && todo.length > 10 && (
+          <div className="px-5 py-3 bg-slate-50 border-t border-slate-300">
+            <button
+              onClick={() => setShowAllTodos(true)}
+              className="w-full text-xs text-indigo-600 text-center hover:text-indigo-700 font-medium cursor-pointer"
+            >
+              Showing 10 of {todo.length} todo(s)
+            </button>
+          </div>
+        )}
+
+        {showAllTodos && todo.length > 10 && (
+          <div className="px-5 py-3 bg-slate-50 border-t border-slate-100">
+            <button
+              onClick={() => setShowAllTodos(false)}
+              className="w-full text-xs text-slate-500 hover:text-slate-700 font-medium cursor-pointer"
+            >
+              Show less
+            </button>
+          </div>
         )}
       </div>
     </div>

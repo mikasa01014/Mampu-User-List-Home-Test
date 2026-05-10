@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "../tailwind.config.ts";
 
 :root {
   --color-bg: #f8fafc;
@@ -49,6 +50,12 @@ body {
 
   .badge-red {
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700;
+  }
+
+  .skeleton {
+    @apply animate-pulse bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 rounded;
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 }
 

@@ -10,6 +10,7 @@ import {
 import { ActivityBadges } from "./ActivityBadges";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { EmptyState } from "./EmptyState";
+import Link from "next/link";
 
 interface UsersTableProps {
   users: UserWithActivity[];
@@ -218,6 +219,7 @@ export function UsersTable({ users }: UsersTableProps) {
             onChange={(e) => setSearchs(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-slate-400 transition-shadow"
             aria-label="Search users"
+            data-testid="search-input"
           />
         </div>
 
@@ -227,24 +229,33 @@ export function UsersTable({ users }: UsersTableProps) {
           onChange={(e) => setFilter(e.target.value as FilterType)}
           className="px-3 py-2.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-700 transition-shadow cursor-pointer"
           aria-label="Filter users"
+          data-testid="filter-select"
         >
-          <option value="all">All users</option>
-          <option value="hasPending">Has pending todos</option>
-          <option value="noCompleted">No completed todos</option>
-          <option value="active">Has posts</option>
+          <option value="all">All user(s)</option>
+          <option value="hasPending">Has pending todo(s)</option>
+          <option value="noCompleted">No completed todo(s)</option>
+          <option value="active">Has post(s)</option>
         </select>
       </div>
 
       {/* Status bar */}
       <div className="flex items-center justify-between text-xs text-slate-500">
         <span>
-          Showing <strong className="text-slate-800">{users.length}</strong> of{" "}
-          <strong className="text-slate-800">{users.length}</strong> users
+          Showing{" "}
+          <strong className="text-slate-800" data-testid="filtered-count">
+            {filtered.length}
+          </strong>{" "}
+          of{" "}
+          <strong className="text-slate-800" data-testid="total-count">
+            {users.length}
+          </strong>{" "}
+          users
         </span>
         {hasActiveFilter && (
           <button
             onClick={clearFilter}
             className="text-indigo-600 hover:text-indigo-700 font-medium underline underline-offset-2"
+            data-testid="clear-filters"
           >
             Clear Filter
           </button>
@@ -275,30 +286,40 @@ export function UsersTable({ users }: UsersTableProps) {
             >
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-100">
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider rounded-tl-xl"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-                  >
-                    Post
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-                  >
-                    Completed
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-                  >
-                    Pending
-                  </th>
+                  {(
+                    [
+                      "name",
+                      "totalPosts",
+                      "completedTodos",
+                      "pendingTodos",
+                    ] as SortField[]
+                  ).map((field) => (
+                    <th
+                      key={field}
+                      scope="col"
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider first:rounded-tl-xl"
+                      aria-sort={
+                        field === sortField
+                          ? sortOrder === "asc"
+                            ? "ascending"
+                            : "descending"
+                          : "none"
+                      }
+                    >
+                      <button
+                        onClick={() => handleSort(field)}
+                        className="flex items-center gap-1 hover:text-indigo-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded transition-colors"
+                        data-testid={`sort-${field}`}
+                      >
+                        {SORT_LABELS[field]}
+                        <SortIcon
+                          field={field}
+                          sortField={sortField}
+                          sortOrder={sortOrder}
+                        />
+                      </button>
+                    </th>
+                  ))}
                   <th
                     scope="col"
                     className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
@@ -313,24 +334,29 @@ export function UsersTable({ users }: UsersTableProps) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody
+                className="divide-y divide-slate-100"
+                data-testid="users-table-body"
+              >
                 {filtered.map((user) => (
                   <tr
                     key={user.id}
-                    className="hover:bg-indigo-50/40 transition-colors group cursor-pointer"
+                    className="group cursor-pointer transition-colors duration-150 hover:bg-indigo-100/40 active:bg-indigo-100/40"
                     onClick={() => router.push(`/users/${user.id}`)}
+                    data-testid={`user-row-${user.id}`}
                   >
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3 min-w-0">
                         <Avatar name={user.name} />
                         <div className="min-w-0">
-                          <a
+                          <Link
                             href={`/users/${user.id}`}
-                            className="font-semibold text-slate-800 hover:text-indigo-600 transition-colors truncate block max-w-[180px] group-hover:text-indigo-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
+                            className="block max-w-[180px] truncate rounded font-semibold text-slate-800 transition-colors duration-150 group-hover:text-indigo-600 active:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                             onClick={(e) => e.stopPropagation()}
+                            data-testid={`user-link-${user.id}`}
                           >
                             {user.name}
-                          </a>
+                          </Link>
                           <span className="text-xs text-slate-400 font-mono">
                             @{user.username}
                           </span>
@@ -362,7 +388,7 @@ export function UsersTable({ users }: UsersTableProps) {
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
-                      <a
+                      <Link
                         href={`https://${user.website}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -370,7 +396,7 @@ export function UsersTable({ users }: UsersTableProps) {
                         onClick={(e) => e.stopPropagation()}
                       >
                         {user.website}
-                      </a>
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -385,11 +411,12 @@ export function UsersTable({ users }: UsersTableProps) {
             aria-label="Users list"
           >
             {filtered.map((user) => (
-              <a
+              <Link
                 href={`/users/${user.id}`}
-                className="flex flex-col gap-3 bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="flex flex-col gap-3 bg-white rounded-xl border border-slate-200 p-4 shadow-sm cursor-pointer hover:border-indigo-300 hover:shadow-md active:border-indigo-300 active:bg-indigo-50/40 active:scale-[0.99] transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 key={user.id}
                 role="listitem"
+                data-testid={`user-card-${user.id}`}
               >
                 <div className="flex items-center gap-3">
                   <Avatar name={user.name} />
@@ -420,7 +447,7 @@ export function UsersTable({ users }: UsersTableProps) {
                   completedTodos={user.completedTodos}
                   pendingTodos={user.pendingTodos}
                 />
-              </a>
+              </Link>
             ))}
           </div>
         </>

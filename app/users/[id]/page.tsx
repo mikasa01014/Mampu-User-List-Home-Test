@@ -105,6 +105,7 @@ export default async function UserDetailPage({ params }: Params) {
       <Link
         href={"/users"}
         className="inline-flex items-center gap-2 test-sm text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+        data-testid="back-link"
       >
         <svg
           className="w-4 h-4"

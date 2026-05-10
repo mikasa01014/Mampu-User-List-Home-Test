@@ -14,7 +14,7 @@ export function ActivityBadges({
   const size = compact ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2 py-0.5";
 
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-1.5" data-testid="activity-badges">
       <span
         title="Total posts"
         className={`inline-flex items-center gap-1 rounded-full font-semibold bg-indigo-50 text-indigo-70 ${size}`}
@@ -38,7 +38,7 @@ export function ActivityBadges({
       {pendingTodos > 0 ? (
         <span
           className={`inline-flex items-center gap-1 rounded-full font-semibold bg-amber-50 text-amber-700 ${size}`}
-          title="Pending todos"
+          title="Pending todo(s)"
         >
           <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 12A5 5 0 118 3a5 5 0 010 10zm1-5.5V4H7v5l3.5 2.1.8-1.2L9 8.5z" />
@@ -49,7 +49,7 @@ export function ActivityBadges({
       ) : (
         <span
           className={`inline-flex items-center gap-1 rounded-full font-semibold bg-slate-100 text-slate-500 ${size}`}
-          title="No pending todos"
+          title="No pending todo(s)"
         >
           <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 12A5 5 0 118 3a5 5 0 010 10zm1-5.5V4H7v5l3.5 2.1.8-1.2L9 8.5z" />
